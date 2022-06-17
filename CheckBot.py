@@ -5,6 +5,9 @@ from typing import NoReturn
 import requests
 import telegram
 from dotenv import load_dotenv
+import logging
+
+logger = logging.getLogger("CheckBot")
 
 
 def main():
@@ -12,6 +15,8 @@ def main():
     auth_token_api = os.getenv("AUTH_TOKEN")
     chat_id = os.environ.get("TG_CHAT_ID")
     token = os.getenv("TELEGRAM_TOKEN")
+
+    logger.info("Бот запущен")
 
     get_checks(auth_token_api, chat_id, token)
 
