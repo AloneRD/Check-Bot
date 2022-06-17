@@ -7,6 +7,8 @@ import telegram
 from dotenv import load_dotenv
 import logging
 
+logger = logging.getLogger("CheckBot")
+logger.setLevel(logging.INFO)
 
 
 def main():
@@ -15,7 +17,7 @@ def main():
     chat_id = os.environ.get("TG_CHAT_ID")
     token = os.getenv("TELEGRAM_TOKEN")
 
-    logging.info("Бот запущен")
+    logger.info("Бот запущен")
 
     get_checks(auth_token_api, chat_id, token)
 
