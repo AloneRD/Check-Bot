@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 
 def main():
+    load_dotenv()
     auth_token_api = os.getenv("AUTH_TOKEN")
     chat_id = os.environ.get("TG_CHAT_ID")
     token = os.getenv("TELEGRAM_TOKEN")
@@ -25,12 +26,12 @@ def get_checks(auth_token_api: str, chat_id: str, token: str) -> NoReturn:
         try:
             response_tasks = requests.get(url_api, headers=headers, params=str(timestamp), timeout=20)
             response_tasks.raise_for_status()
-            info_tasks = response_tasks.json()
-            if info_tasks['status'] == "timeout":
-                timestamp = info_tasks['timestamp_to_request']
+            review_info = response_tasks.json()
+            if review_info['status'] == "timeout":
+                timestamp = review_info['timestamp_to_request']
             else:
-                timestamp = info_tasks["last_attempt_timestamp"]
-                send_message_telegramm(info_tasks, chat_id, token) 
+                timestamp = review_info["last_attempt_timestamp"]
+                send_message_telegramm(review_info, chat_id, token) 
         except requests.exceptions.ReadTimeout:
             pass
         except requests.exceptions.ConnectionError:
@@ -57,5 +58,4 @@ def send_message_telegramm(task: json, chat_id: str, token: str) -> NoReturn:
 
 
 if __name__ == "__main__":
-    load_dotenv()
     main()
