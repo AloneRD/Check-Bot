@@ -17,7 +17,7 @@ def main():
     chat_id = os.environ.get("TG_CHAT_ID")
     token = os.getenv("TELEGRAM_TOKEN")
 
-    logger.info("Бот запущен")
+    logger.warning("Бот запущен")
 
     get_checks(auth_token_api, chat_id, token)
 
