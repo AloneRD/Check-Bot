@@ -6,18 +6,31 @@ import time
 from typing import NoReturn
 import requests
 import telegram
-from handler import TelegramLogsHandler
+from dotenv import load_dotenv
 
 logger = logging.getLogger("CheckBot")
-logger.setLevel(logging.INFO)
-logger.addHandler(TelegramLogsHandler())
 
+
+class TelegramLogsHandler(logging.Handler):
+
+    def __init__(self, token, chat_id) -> None:
+        super().__init__()
+        self.bot = telegram.Bot(token)
+        self.chat_id = chat_id
+
+    def emit(self, record) -> None:
+        log_entry = self.format(record)
+        self.bot.send_message(chat_id=self.chat_id, text=log_entry)
 
 
 def main():
+    load_dotenv()
     auth_token_api = os.getenv("AUTH_TOKEN")
     chat_id = os.environ.get("TG_CHAT_ID")
     token = os.getenv("TELEGRAM_TOKEN")
+
+    logger.setLevel(logging.INFO)
+    logger.addHandler(TelegramLogsHandler(token, chat_id))
 
     logger.info("Бот запущен")
 
@@ -44,28 +57,26 @@ def get_checks(auth_token_api: str, chat_id: str, token: str) -> NoReturn:
             pass
         except requests.exceptions.ConnectionError:
             time.sleep(5)
+        except:
+            logger.exception("Бот упал с ошибкой")
 
 
 def send_message_telegramm(task: json, chat_id: str, token: str) -> NoReturn:
-    try:
-        bot = telegram.Bot(token)
-        tasks = task['new_attempts']
-        for task in tasks:
-            lesson_title = task['lesson_title']
-            lesson_url = task['lesson_url']
-            result = task['is_negative']
-            if result:
-                text_message = f"У Вас проверили работу {lesson_title}.\n\r\
-                                Ссылка на работу {lesson_url}.\n\r\
-                                К сожалению в работе нашлись ошибки."
-            else:
-                text_message = f"У Вас проверили работу {lesson_title}.\n\r\
-                                Ссылка на работу {lesson_url}\n\r\
-                                Преподователю все понравилось!"
-            bot.send_message(chat_id=chat_id, text=text_message)
-    except Exception as err:
-        logger.warning("Бот упал с ошибкой")
-        logger.error(err, exc_info=True)
+    bot = telegram.Bot(token)
+    tasks = task['new_attempts']
+    for task in tasks:
+        lesson_title = task['lesson_title']
+        lesson_url = task['lesson_url']
+        result = task['is_negative']
+        if result:
+            text_message = f"У Вас проверили работу {lesson_title}.\n\r\
+                            Ссылка на работу {lesson_url}.\n\r\
+                            К сожалению в работе нашлись ошибки."
+        else:
+            text_message = f"У Вас проверили работу {lesson_title}.\n\r\
+                            Ссылка на работу {lesson_url}\n\r\
+                            Преподователю все понравилось!"
+        bot.send_message(chat_id=chat_id, text=text_message)
 
 
 if __name__ == "__main__":
