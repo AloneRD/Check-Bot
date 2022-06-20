@@ -6,4 +6,4 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 CMD python CheckBot.py
-EXPOSE 3000
+EXPOSE 3000:3000
